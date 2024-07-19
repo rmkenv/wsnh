@@ -1,11 +1,22 @@
-import streamlit as st
+ import streamlit as st
 import google.generativeai as genai
 import PyPDF2
 import pandas as pd
 from io import StringIO
 
+# Title and description
+st.title("FOA Document Compliance Analyzer")
+st.markdown("""
+For more information on the related regulations and requirements, you can refer to [COMAR 14.26.02 - Green Building Tax Credit Program](https://github.com/MEADecarb/FOAChat/blob/main/COMAR%2014.26.02%20%20Green%20Building%20Tax%20Credit%20Program.md).
+""")
+
+# Prompt user to input their Gemini API key
+api_key = st.text_input("Enter your Gemini API key", type="password")
+st.markdown("[Get an API key with your Google Account](https://ai.google.dev/gemini-api/docs/api-key)")
+
 # Configure Gemini API
-genai.configure(api_key=st.secrets["gemini"]["api_key"])
+if api_key:
+    genai.configure(api_key=api_key)
 
 # Numbered checklist based on Section 14.26.02.04 and Section 14.26.02.05
 checklist = [
@@ -76,41 +87,48 @@ def analyze_document(document, reference_text):
 
     Determine if the document conforms with the intent and law from the reference. 
     Provide supporting evidence for each checklist item.
+
+    Additionally, provide an overall summary statement about suggested improvements for the document.
     """
     response = model.generate_content(prompt)
     supporting_evidence = response.text
 
-    return results, supporting_evidence
+    # Extract the formatted supporting evidence and summary statement
+    summary_start = supporting_evidence.find("Overall Summary Statement")
+    if summary_start != -1:
+        supporting_evidence_formatted = supporting_evidence[:summary_start].strip()
+        summary_statement = supporting_evidence[summary_start:].strip()
+    else:
+        supporting_evidence_formatted = supporting_evidence.strip()
+        summary_statement = "No summary provided."
 
-def create_csv(results, supporting_evidence):
+    return results, supporting_evidence_formatted, summary_statement
+
+def create_csv(results, supporting_evidence, summary_statement):
     df = pd.DataFrame(results, columns=["Checklist Item", "Compliance"])
     df["Supporting Evidence"] = [""] * len(df)
     df.loc[0, "Supporting Evidence"] = supporting_evidence  # Add supporting evidence to the first row
+    df["Summary Statement"] = summary_statement
     csv = df.to_csv(index=False)
     return csv
-
-st.title("FOA Document Compliance Analyzer")
-
-st.markdown("""
-For more information on the related regulations and requirements, you can refer to [COMAR 14.26.02 - Green Building Tax Credit Program](https://github.com/MEADecarb/FOAChat/blob/main/COMAR%2014.26.02%20%20Green%20Building%20Tax%20Credit%20Program.md).
-""")
 
 # Upload documents to analyze
 uploaded_files = st.file_uploader("Upload documents to analyze", type=["txt", "pdf"], accept_multiple_files=True)
 
 if uploaded_files:
-    if st.button("Analyze Documents"):
+    if st.button("Analyze Documents") and api_key:
         for uploaded_file in uploaded_files:
             st.write(f"Analyzing: {uploaded_file.name}")
-            results, supporting_evidence = analyze_document(uploaded_file, reference_text)
+            results, supporting_evidence, summary_statement = analyze_document(uploaded_file, reference_text)
             
-            st.write(f"Supporting evidence: {supporting_evidence}")
+            st.write(f"Supporting evidence:\n{supporting_evidence}")
+            st.write(f"{summary_statement}")
             
             for item, result in results:
                 st.write(f"{item}: {result}")
                 st.divider()
             
-            csv = create_csv(results, supporting_evidence)
+            csv = create_csv(results, supporting_evidence, summary_statement)
             st.download_button(
                 label="Download Results as CSV",
                 data=csv,
@@ -118,5 +136,7 @@ if uploaded_files:
                 mime="text/csv"
             )
             st.divider()
+    elif not api_key:
+        st.warning("Please enter your Gemini API key.")
 else:
     st.write("Please upload at least one document to analyze.")
