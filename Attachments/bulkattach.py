@@ -11,7 +11,6 @@ import io
 from PIL import Image
 import zipfile
 import shutil
-from st_paywall import add_auth
 
 # Define functions
 def set_font(paragraph, font_name, font_size):
