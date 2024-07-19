@@ -1,16 +1,18 @@
+import os
+import io
+import shutil
+import zipfile
+from PIL import Image
+
 import streamlit as st
 from google_auth_oauthlib.flow import Flow
 from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
-import os
+
 import fitz  # PyMuPDF
 from docx import Document
 from docx.shared import Inches, Pt
 from docx.oxml.ns import qn
-import io
-from PIL import Image
-import zipfile
-import shutil
 
 # Define functions
 def set_font(paragraph, font_name, font_size):
