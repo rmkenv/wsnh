@@ -112,24 +112,26 @@ files = st.file_uploader(f"Upload {file_type} files to append", type=[file_types
 
 if st.button("Process"):
     if zip_file and files:
-        zip_path = zip_file.name
-        output_zip_path = "output.zip"
+        zip_path = os.path.join("uploaded_files", zip_file.name)
+        os.makedirs("uploaded_files", exist_ok=True)
 
         with open(zip_path, "wb") as f:
             f.write(zip_file.getbuffer())
 
         file_paths = []
         for file in files:
-            file_path = file.name
+            file_path = os.path.join("uploaded_files", file.name)
             with open(file_path, "wb") as f:
                 f.write(file.getbuffer())
             file_paths.append(file_path)
 
+        output_zip_path = os.path.join("uploaded_files", "output.zip")
         process_zip(zip_path, file_paths, output_zip_path, file_types[file_type])
         
         with open(output_zip_path, "rb") as f:
             st.download_button("Download processed ZIP", f, file_name="processed_documents.zip")
         
         st.success(f"{file_type}s appended to Word documents in {output_zip_path} successfully.")
+        shutil.rmtree("uploaded_files")
     else:
         st.error("Please upload both a ZIP file and at least one file to append.")
