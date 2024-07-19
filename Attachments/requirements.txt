@@ -1,5 +1,5 @@
-streamlit==1.11.1
-PyMuPDF==1.21.0
-python-docx==0.8.11
-Pillow==9.2.0
-st-paywall==0.1.0
+streamlit
+PyMuPDF
+python-docx
+Pillow
+st-paywall
