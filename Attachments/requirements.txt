@@ -3,3 +3,4 @@ PyMuPDF
 python-docx
 Pillow
 st-paywall
+google-auth-oauthlib
