@@ -8,6 +8,7 @@ from PIL import Image
 import zipfile
 import os
 import shutil
+from st_paywall import paywall
 
 # Define functions
 def set_font(paragraph, font_name, font_size):
@@ -92,8 +93,14 @@ def process_zip(zip_path, file_paths, output_zip_path, file_type):
 # Streamlit app
 st.title("Append PDFs or Word Documents to Word Documents")
 
-# Add a text box with a link to MEA Attachment A
-st.markdown("### MEA Attachment A available here: [MEA Attachment A](https://energy.maryland.gov/Pages/all-incentives.aspx)")
+# Add a paywall
+paywall_info = {
+    "name": "st-paywall",
+    "url": "https://your-payment-url.com",
+    "text": "Please subscribe to access this feature.",
+    "button_text": "Subscribe Now"
+}
+paywall(paywall_info)
 
 # Upload zip file
 zip_file = st.file_uploader("Upload ZIP file containing Word documents", type=["zip"])
