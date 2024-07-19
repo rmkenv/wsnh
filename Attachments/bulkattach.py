@@ -8,7 +8,7 @@ from PIL import Image
 import zipfile
 import os
 import shutil
-from st_paywall import add_auth
+from st_paywall import add_auth, check_auth
 
 # Define functions
 def set_font(paragraph, font_name, font_size):
@@ -94,10 +94,10 @@ def process_zip(zip_path, file_paths, output_zip_path, file_type):
 st.title("Append PDFs or Word Documents to Word Documents")
 
 # Add authentication
-add_auth(required=True)
+add_auth()
 
 # Check authentication and subscription status
-if st.session_state.get("user_subscribed"):
+if check_auth():
     st.write(f"Welcome, {st.session_state.email}!")
 
     # Upload zip file
