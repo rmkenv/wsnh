@@ -135,4 +135,4 @@ if check_auth():
             st.error("Please upload both a ZIP file and at least one file to append.")
 else:
     st.warning("Please subscribe to access this feature.")
-    st.markdown("[Subscribe Now](https://your-payment-url.com)")
+    st.markdown("[Subscribe Now](https://www.buymeacoffee.com/kmetzrm)")
