@@ -8,6 +8,7 @@ from PIL import Image
 import zipfile
 import os
 import shutil
+from st_paywall import add_auth
 
 # Define functions
 def set_font(paragraph, font_name, font_size):
@@ -92,9 +93,13 @@ def process_zip(zip_path, file_paths, output_zip_path, file_type):
 # Streamlit app
 st.title("Append PDFs or Word Documents to Word Documents")
 
-# Simulate a paywall
-st.sidebar.title("Access Control")
-if st.sidebar.checkbox("I have subscribed"):
+# Add authentication
+add_auth(required=True)
+
+# Check authentication and subscription status
+if st.session_state.get("user_subscribed"):
+    st.write(f"Welcome, {st.session_state.email}!")
+
     # Upload zip file
     zip_file = st.file_uploader("Upload ZIP file containing Word documents", type=["zip"])
     # Choose file type to append
@@ -129,6 +134,5 @@ if st.sidebar.checkbox("I have subscribed"):
         else:
             st.error("Please upload both a ZIP file and at least one file to append.")
 else:
-    st.sidebar.warning("Please subscribe to access this feature.")
-    st.sidebar.markdown("[Subscribe Now](https://your-payment-url.com)")
-
+    st.warning("Please subscribe to access this feature.")
+    st.markdown("[Subscribe Now](https://your-payment-url.com)")
